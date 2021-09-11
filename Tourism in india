@@ -1,0 +1,94 @@
+/* create database*/
+create database Tourism_in_india;
+
+/* use databse*/
+use Tourism_in_india;
+
+/* create table as per data*/
+create table tourism(
+Circle char,
+Monument char,
+Domestic201617 int,
+Foreign201617 int,
+Domestic201718 int,
+Foreign201718 int);
+
+/* import data using import wizard*/
+/*view the data*/
+select*
+from tourism;
+
+/* make safe update off*/
+set sql_safe_updates = 0;
+
+/*count the no. of circles*/
+SELECT count(distinct Circle)
+FROM tourism;
+
+/*count the no. of monuments*/
+select count(distinct Monument)
+from tourism;
+
+/*count the monuments in each circle*/
+select circle, count(distinct Monument)
+from tourism
+group by circle
+order by count(distinct Monument) desc;
+
+/* add rewuired column in the table*/
+alter table Tourism
+add column Total201617 int,
+add column Total201718 int,
+add column Total201618 int;
+
+/*calculate the data as required*/
+select circle, Monument,sum(Domestic201617 +Foreign201617) AS TOTAL201617 , sum(Domestic201718+Foreign201718) as Total201718
+from tourism
+group by Monument;
+
+select circle, sum(Domestic201617 +Foreign201617) AS TOTAL201617 , sum(Domestic201718+Foreign201718) as Total201718
+from tourism
+group by Circle;
+
+/* fill the column with calculated data*/
+update tourism
+set Total201617 = Domestic201617 + Foreign201617,
+Total201718 = Domestic201718 + Foreign201718;
+
+update tourism
+set Total201618 = Domestic201617+Foreign201617+Domestic201718+Foreign201718 ;
+
+/*to see circle wise tourist*/
+select Circle, Total201618
+from tourism
+group by Circle
+order by Total201618 Desc;
+
+/*select total yearwise tourist by dom and foreign*/
+select sum(Total201617) AS TY1617, sum(Total201718) AS TY1617, sum(Total201618) AS TY1618,
+sum(Domestic201617) as DY1617,sum(Domestic201718) as DY1718,
+sum(Foreign201617) as FY1617,sum(Foreign201718) as FY1718
+FROM tourism;
+
+/*calculate the change yoy*/
+select monument,(Foreign201718 - Foreign201617)/ Foreign201617 as Fchange,
+(Domestic201718 - Domestic201617)/Domestic201617 as Dchange,
+(Total201718 - Total201617)/Total201617 as Tchange
+from tourism;
+
+
+/*add column to keep percent change*/
+alter table Tourism
+add column Fchange FLOAT(10,2),
+add column Dchange FLOAT(10,2),
+add column Tchange FLOAT(10,2) ;
+
+/*populate the column with with calculated data*/
+update tourism
+set Fchange = (Foreign201718 - Foreign201617)/ Foreign201617,
+Dchange = (Domestic201718 - Domestic201617)/Domestic201617,
+Tchange = (Total201718 - Total201617)/Total201617;
+
+/*see the final table*/
+select*
+from tourism;
